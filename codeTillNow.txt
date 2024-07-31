@@ -1,0 +1,155 @@
+#include <iostream>
+#include <raylib.h>
+
+using namespace std;
+
+class Ball
+{
+    public :
+    //x and y coordinates of the ball
+    float x, y;
+    //speed of the ball in x and y coordinates
+    int speed_x, speed_y;
+    //radius of ball
+    int radius;
+
+    void Draw()
+    {
+        DrawCircle(x, y, radius, WHITE);
+    }
+
+    // to make the ball move
+    void update()
+    {
+        //the below 2 lines of code  : increase x and y coordinates of the ball object
+        //by 7 pixels each time the game loop is run.
+        x = x + speed_x;
+        y = y + speed_y;
+
+        //code for ball to bounce back and not leave canvas
+        if(y + radius >= GetScreenHeight() || y - radius <= 0)
+        {
+            speed_y = speed_y * (-1);
+        }
+        if(x + radius >= GetScreenWidth() || x - radius <= 0)
+        {
+            speed_x = speed_x * (-1);
+        }
+    }
+};
+
+class Paddle
+{
+    public :
+    //position of paddle or rectangle in the canvas
+    float x, y;
+    //dimensions of paddle or rectangle ie width, height
+    float width, height;
+    //speed : only reqd vertical speed, as paddle moves only up and down 
+    int speed;
+
+    void Draw()
+    {
+        DrawRectangle(x, y, width, height, WHITE);
+    }
+
+    void update()
+    {
+        //we want to move up the paddle when user presses up key on his keyboard
+        //using ray lib : isKeyDown func
+        if(IsKeyDown(KEY_UP))
+        {
+            y = y - speed;
+        }
+        if(IsKeyDown(KEY_DOWN))
+        {
+            y = y + speed;
+        }
+
+        //make sure paddle dont move outside of canvas
+        if(y <= 0 )
+        {
+            y = 0;
+        }
+        if(y >= GetScreenHeight())
+        {
+            y = GetScreenHeight() - height;
+        }
+    }
+};
+
+Ball ball;
+Paddle player;
+
+int main () {
+
+    cout<<"Starting the game"<<endl;
+
+    const int screen_width = 1280;
+    const int screen_height = 800;
+
+    //SetTargetFPS : define how fast the game should run
+    //it takes an integer as output which is the no of FPS that we want
+    //if we dont define fps, computer will try to run the game as fast as possible
+    //so the game speed will depend on the speed of the computer
+    //60 means : we want to run while loop of game and update display 60 times per sec
+    SetTargetFPS(60);
+
+    //initialise ball object
+    ball.radius = 20; //here 20 is in pixels
+    ball.x = screen_width/2;
+    ball.y = screen_height/2;
+    ball.speed_x = 7;
+    ball.speed_y = 7;
+
+    //initialise player object of class paddle
+    player.width = 25;
+    player.height = 120;
+    player.x = screen_width - player.width - 10;
+    player.y = (screen_height / 2) - (player.height / 2);
+    player.speed = 6;
+
+
+    //Initialise Game Window
+    InitWindow(screen_width, screen_height, "My Pong Game");
+
+    //start the game loop with while loop
+    //WindowShouldClose()  : checks if escape is pressed or if close icon of window is pressed
+    while(WindowShouldClose() == false)
+    {
+        //BeginDrawing : this func creates a blank canvas, so we
+        //can draw our game objects on it
+        BeginDrawing();
+
+        //updating
+        ball.update();
+        player.update();
+
+        //to remove backtraces of ball moving
+        ClearBackground(BLACK);
+
+        //draw line : to divide 2 sides : begin index(x,y), end indices(x,y), color
+        DrawLine(screen_width/2, 0, screen_width/2, screen_height, WHITE);
+
+        //Drawing : a ball at centre of canvas
+        // DrawCircle(screen_width/2, screen_height/2, 20, WHITE);
+
+        //call Draw method of ball object
+        ball.Draw();
+
+        //Drawing : a Rectangle ie paddle 1: width, height
+        //note : a rectangle is drawn from its top left point
+        DrawRectangle(10, screen_height/2 - 60, 25, 120, WHITE);
+        //why 35 not 10 : bcz rectangle is drawn from its top left corner
+        //and for right paddle : top left coordinate : 1200-10-25
+        // DrawRectangle(screen_width-35, screen_height/2 - 60, 25, 120, WHITE);
+        player.Draw();
+
+        //EndDrawing : func ends the canvas drawing
+        EndDrawing();
+    }
+
+    //Close Game Window
+    CloseWindow();
+    return 0;
+}
